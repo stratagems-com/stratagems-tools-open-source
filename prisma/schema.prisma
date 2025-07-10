@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// APP MANAGEMENT
+// =============================================================================
+
+model App {
+    id          String     @id @default(cuid())
+    name        String     @unique
+    description String?
+    secret      String     @unique // API secret token
+    isActive    Boolean    @default(true)
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+    activeUntil DateTime?
+    permission  Permission @default(WRITE)
+
+    @@index([name])
+    @@index([secret])
+    @@index([isActive])
+    @@index([createdAt])
+    @@map("apps")
+}
+
+// =============================================================================
+// LOOKUP SYSTEM
+// =============================================================================
+
+model Lookup {
+    id                 String   @id @default(cuid())
+    name               String   @unique
+    description        String?
+    leftSystem         String?
+    rightSystem        String?
+    allowLeftDups      Boolean  @default(true)
+    allowRightDups     Boolean  @default(true)
+    allowLeftRightDups Boolean  @default(true)
+    strictChecking     Boolean  @default(false)
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
+
+    // Relations
+    values LookupValue[]
+
+    @@index([leftSystem])
+    @@index([rightSystem])
+    @@index([createdAt])
+    @@map("lookups")
+}
+
+model LookupValue {
+    id            String   @id @default(cuid())
+    lookupId      String
+    lookup        Lookup   @relation(fields: [lookupId], references: [id], onDelete: Cascade)
+    left          String
+    right         String
+    leftMetadata  Json?
+    rightMetadata Json?
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    @@index([lookupId])
+    @@index([left])
+    @@index([right])
+    @@index([lookupId, left])
+    @@index([lookupId, right])
+    @@index([lookupId, left, right])
+    @@index([createdAt])
+    @@map("lookup_values")
+}
+
+// =============================================================================
+// SET SYSTEM
+// =============================================================================
+
+model Set {
+    id              String   @id @default(cuid())
+    name            String   @unique
+    description     String?
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+    allowDuplicates Boolean  @default(true)
+    strictChecking  Boolean  @default(false)
+
+    // Relations
+    values SetValue[]
+
+    @@index([name])
+    @@index([createdAt])
+    @@map("sets")
+}
+
+model SetValue {
+    id        String   @id @default(cuid())
+    setId     String
+    set       Set      @relation(fields: [setId], references: [id], onDelete: Cascade)
+    value     String
+    metadata  Json?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([setId])
+    @@index([value])
+    @@index([setId, value])
+    @@index([createdAt])
+    @@map("set_values")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum Permission {
+    READ
+    WRITE
+    NONE
+}

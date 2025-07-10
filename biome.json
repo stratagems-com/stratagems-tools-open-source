@@ -1,0 +1,125 @@
+{
+    "$schema": "https://biomejs.dev/schemas/1.5.0/schema.json",
+    "vcs": {
+        "enabled": true,
+        "clientKind": "git",
+        "useIgnoreFile": true
+    },
+    "files": {
+        "ignoreUnknown": false,
+        "ignore": [
+            "node_modules/**",
+            "dist/**",
+            "coverage/**",
+            "*.min.js",
+            "*.bundle.js"
+        ]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 2,
+        "lineWidth": 100,
+        "lineEnding": "lf",
+        "ignore": []
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true,
+            "correctness": {
+                "noUnusedVariables": "error",
+                "noUndeclaredVariables": "error",
+                "useExhaustiveDependencies": "error"
+            },
+            "suspicious": {
+                "noExplicitAny": "error",
+                "noArrayIndexKey": "error",
+                "noConsoleLog": "warn",
+                "noDebugger": "error",
+                "noDoubleEquals": "error",
+                "noEmptyInterface": "error",
+                "noGlobalThis": "error",
+                "noInnerDeclarations": "error",
+                "noMisleadingInstantiator": "error",
+                "noNewSymbol": "error",
+                "noObjectConstructor": "error",
+                "noPrecisionLoss": "error",
+                "noSelfAssign": "error",
+                "noSelfCompare": "error",
+                "noSparseArray": "error",
+                "noStringCaseMismatch": "error",
+                "noUnsafeDeclarationMerging": "error",
+                "noUnsafeNegation": "error",
+                "noUnsafeOptionalChaining": "error",
+                "noUnusedImports": "error",
+                "useExhaustiveDependencies": "error"
+            },
+            "style": {
+                "noNonNullAssertion": "error",
+                "noParameterAssign": "error",
+                "noRestrictedGlobals": "error",
+                "noVar": "error",
+                "useBlockStatements": "error",
+                "useConst": "error",
+                "useDefaultParameterLast": "error",
+                "useExponentiationOperator": "error",
+                "useLiteralKeys": "error",
+                "useNamingConvention": "error",
+                "useNumberNamespace": "error",
+                "useOptionalChain": "error",
+                "useShorthandArrayType": "error",
+                "useTemplate": "error",
+                "useWhile": "error"
+            },
+            "complexity": {
+                "noExcessiveCognitiveComplexity": "warn",
+                "noForEach": "warn",
+                "noMultipleSpacesInRegularExpressionLiterals": "error",
+                "noStaticOnlyClass": "error",
+                "noUselessElse": "error",
+                "noUselessFragments": "error",
+                "noUselessLoneBlockStatements": "error",
+                "noUselessSwitchCase": "error",
+                "noUselessTypeAssertion": "error",
+                "noUselessTypeConstraint": "error",
+                "useArrowFunction": "error",
+                "useBlockStatements": "error",
+                "useConst": "error",
+                "useDefaultParameterLast": "error",
+                "useExponentiationOperator": "error",
+                "useLiteralKeys": "error",
+                "useNamingConvention": "error",
+                "useNumberNamespace": "error",
+                "useOptionalChain": "error",
+                "useShorthandArrayType": "error",
+                "useTemplate": "error",
+                "useWhile": "error"
+            },
+            "performance": {
+                "noDelete": "error",
+                "noDollarSign": "error",
+                "noNewArray": "error",
+                "noRegexpLookbehind": "error",
+                "noUnusedImports": "error"
+            },
+            "security": {
+                "noDangerouslySetInnerHtml": "error",
+                "noDangerouslySetInnerHtmlWithChildren": "error",
+                "noGlobalThis": "error",
+                "noInnerDeclarations": "error",
+                "noUnsafeDeclarationMerging": "error"
+            }
+        }
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+            "trailingCommas": "es5",
+            "semicolons": "always"
+        }
+    },
+    "organizeImports": {
+        "enabled": true
+    }
+}
