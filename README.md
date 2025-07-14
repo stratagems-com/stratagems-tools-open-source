@@ -1,23 +1,83 @@
-# ST Open Source
+# Stratagems Automation Tools
 
-A lightweight data synchronization bridge for business systems, built with Node.js, Express, and PostgreSQL.
+A lightweight data synchronization and memory layer for automation workflows. Built with Node.js, Express, and PostgreSQL, it gives tools like **n8n**, **Zapier**, and internal scripts a persistent way to:
+
+- Track which items were already processed  
+- Map IDs between systems (ERP, CRM, Shopify...)  
+- Lock resources to prevent duplicate or concurrent processing  
+
+Use it to build **reliable**, **idempotent**, and **traceable** automations with ease.
+
+---
+
+## 💡 Core Concepts
+
+| Feature    | Description                                                                                   | Example Use Case                                                                |
+|------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| **Set**    | Tracks unique values you've already processed                                                 | Avoid processing the same Shopify order twice in n8n                           |
+| **Lookup** | Stores a mapping between two systems' IDs (with optional metadata)                            | Link a customer's ERP ID to their Shopify ID                                   |
+| **Lock**   | Temporarily locks a resource to prevent simultaneous access from multiple workflows           | Prevent race conditions while syncing orders or stock                          |
+
+---
+
+## ⚙️ Example: n8n + Shopify + ERP
+
+You're syncing Shopify orders to your ERP using n8n. Here's how `n8n-statebox` fits in:
+
+1. **Check if the order was already processed**
+    ```http
+    GET /api/v1/sets/{setId}/contains?value=shopify_order_123
+    ```
+
+2. **If not, create it in the ERP**
+
+3. **Store the ID mapping**
+    ```http
+    POST /api/v1/lookups/{lookupId}/values
+    {
+      "left": "shopify_order_123",
+      "right": "erp_order_456"
+    }
+    ```
+
+4. **Mark the order as processed**
+    ```http
+    POST /api/v1/sets/{setId}/values
+    {
+      "value": "shopify_order_123"
+    }
+    ```
+
+5. **(Optional)** Lock it to prevent duplicates:
+    ```http
+    POST /api/v1/locks/acquire
+    {
+      "resource": "shopify_order_123"
+    }
+    ```
+
+👉 See [`examples/`](./examples/) for ready-to-use n8n workflows, curl commands, and templates.
+
+---
 
 ## 🚀 Features
 
-### Core Features
+### Core
 
-- **App Management**: Multi-tenant application management with API key authentication
-- **Lookup System**: Bidirectional ID mapping between different business systems
-- **Set Management**: Prevent duplicate processing with value tracking
+- ✅ **Multi-tenant** application support with API key auth
+- 🔁 **Lookup System** for cross-platform ID mappings
+- 🔒 **Lock API** to avoid concurrent processing
+- 📌 **Set Tracker** for idempotent workflows
 
-### Key Benefits
+### Benefits
 
-- 🔐 **Secure**: API key-based authentication
-- 🚀 **Fast**: Optimized PostgreSQL queries with proper indexing
-- 📊 **Scalable**: Multi-tenant architecture
-- 🔍 **Auditable**: Comprehensive logging with Winston
-- 🐳 **Containerized**: Docker support with tag-based versioning
-- 🏗️ **Well-structured**: MVC pattern with controllers and middleware
+- 🔐 **Secure**: API key protection
+- 🚀 **Fast**: Indexed PostgreSQL + optional Redis
+- 📊 **Scalable**: Built with multi-tenancy in mind
+- 🔍 **Auditable**: Winston-based structured logs
+- 🐳 **Containerized**: Docker + version-tagged builds
+- 🏗️ **Clean Code**: MVC structure with Prisma and middleware
+
 
 ## 📋 Prerequisites
 
