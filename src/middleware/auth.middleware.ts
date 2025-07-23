@@ -21,7 +21,8 @@ export const validateApiKey = async (
     res: Response,
     next: NextFunction
 ): Promise<void> => {
-    const apiKey = req.headers['x-api-key'];
+
+    const apiKey = req.headers['x-api-key'] || req.headers['X-API-Key'] || req.headers['X-API-KEY'];
 
     if (!apiKey) {
         res.status(401).json({

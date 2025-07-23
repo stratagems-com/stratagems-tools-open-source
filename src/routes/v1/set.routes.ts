@@ -21,7 +21,7 @@ router.post('/:set/values', SetController.addSetValue);
 router.post('/:set/values/bulk', SetController.addSetValuesBulk);
 
 // GET /api/v1/sets/:set/contains - Check if value exists in set
-router.get('/:set/contains', SetController.checkSetValue);
+router.post('/:set/contains', SetController.checkSetValue);
 
 // POST /api/v1/sets/:set/contains/bulk - Check multiple values in set
 router.post('/:set/contains/bulk', SetController.checkSetValuesBulk);

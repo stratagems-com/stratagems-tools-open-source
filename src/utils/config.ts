@@ -6,15 +6,15 @@ dotenv.config();
 
 // Log loaded environment variables (excluding sensitive ones)
 const logEnvironment = () => {
-    const sensitiveKeys = ['SECRET', 'PASSWORD', 'KEY', 'TOKEN', 'URL'];
+    //const sensitiveKeys = ['SECRET', 'PASSWORD', 'KEY', 'TOKEN', 'URL'];
 
     console.log('🔧 Environment variables loaded:');
-    Object.keys(process.env).forEach(key => {
-        const isSensitive = sensitiveKeys.some(sensitive => key.includes(sensitive));
-        const value = isSensitive ? '[REDACTED]' : process.env[key];
-        console.log(`  ${key}: ${value}`);
-    });
-    console.log('');
+    // Object.keys(process.env).forEach(key => {
+    //     const isSensitive = sensitiveKeys.some(sensitive => key.includes(sensitive));
+    //     const value = isSensitive ? '[REDACTED]' : process.env[key];
+    //     console.log(`  ${key}: ${value}`);
+    // });
+    // console.log('');
 };
 
 // Call logging function
@@ -74,6 +74,8 @@ const configSchema = z.object({
 
     // Docker tag (optional, for versioning)
     DOCKER_TAG: z.string().optional(),
+
+    TEST_DATA: z.coerce.boolean().optional()
 });
 
 // Parse and validate configuration

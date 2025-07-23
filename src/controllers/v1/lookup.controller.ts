@@ -377,7 +377,7 @@ export class LookupController {
     static async searchLookupValues(req: Request, res: Response): Promise<void> {
         try {
 
-            const { left, right, limit = 50, search } = validateQuery(req, searchLookupValuesSchema);
+            const { left, right, search } = validateQuery(req, searchLookupValuesSchema);
             const { lookup } = validateParams(req, lookupIdParamSchema);
 
             const lookupData = await prisma.lookup.findUnique({
@@ -405,7 +405,6 @@ export class LookupController {
 
             const values = await prisma.lookupValue.findMany({
                 where: whereClause,
-                take: Math.min(limit, 100),
                 orderBy: { createdAt: 'desc' },
             });
 

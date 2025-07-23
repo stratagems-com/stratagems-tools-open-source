@@ -1,5 +1,5 @@
 # =============================================================================
-# ST Open Source - Production Dockerfile
+# ST Open Source - Production Dockerfile (Fixed)
 # =============================================================================
 
 # Use Node.js 18 Alpine as base image for smaller size and security
@@ -19,7 +19,7 @@ COPY package.json pnpm-lock.yaml ./
 # =============================================================================
 FROM base AS deps
 
-# Install all dependencies (including dev dependencies for Prisma)
+# Install all dependencies (including dev dependencies for build tools)
 RUN pnpm install --frozen-lockfile --prod=false
 
 # =============================================================================
@@ -30,13 +30,16 @@ FROM base AS builder
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy source code
+# Copy source code and config files
 COPY . .
 
 # Generate Prisma client
 RUN pnpm db:generate
 
-# Build the application
+# Install tsc-alias for path resolution (if not already in devDependencies)
+RUN pnpm add -D tsc-alias
+
+# Build the application with path resolution
 RUN pnpm build
 
 # =============================================================================
@@ -57,14 +60,18 @@ WORKDIR /app
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-# Install only production dependencies (skip postinstall script)
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+# Install only production dependencies
+RUN pnpm install --frozen-lockfile --prod
 
 # Copy built application from builder stage
 COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
 
 # Copy the generated Prisma client from builder stage
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+
+# Copy prisma schema for runtime
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 # Create necessary directories with proper permissions
 RUN mkdir -p /app/logs /app/uploads
@@ -81,4 +88,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the application
-CMD ["node", "dist/index.js"] 
+CMD ["node", "dist/index.js"]

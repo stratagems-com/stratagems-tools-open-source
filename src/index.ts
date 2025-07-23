@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { config, isTest } from './utils/config';
 import { connectDatabase, disconnectDatabase } from './utils/database';
 import logger from './utils/logger';
+import { seedTestData } from './utils/seed';
 
 // Import middleware
 import { errorHandler } from './middleware/error-handler';
@@ -124,12 +125,19 @@ const startServer = async () => {
         // Connect to database
         await connectDatabase();
 
+        // Seed test data if enabled
+        if (config?.TEST_DATA) {
+            logger.info('TEST_DATA is enabled, seeding test data...');
+            await seedTestData();
+        }
+
         // Start listening
         app.listen(config.PORT, () => {
             logger.info(`Server started successfully`, {
                 port: config.PORT,
                 environment: config.NODE_ENV,
                 version: config.VERSION,
+                testData: config.TEST_DATA,
             });
         });
     } catch (error) {

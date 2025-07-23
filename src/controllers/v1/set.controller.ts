@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import { prisma } from '../../utils/database';
 import logger from '../../utils/logger';
-import { validateBody, validateParams, validateQuery } from '../../utils/validator';
+import { validateBody, validateParams } from '../../utils/validator';
 import { addSetValueSchema, addSetValuesBulkSchema, checkSetValueSchema, checkSetValuesBulkSchema, createSetSchema, setIdParamSchema, setValueIdParamSchema } from '../../validations/v1';
 
 /**
@@ -238,7 +238,7 @@ export class SetController {
     static async checkSetValue(req: Request, res: Response): Promise<void> {
         try {
 
-            const { value } = validateQuery(req, checkSetValueSchema);
+            const { value } = validateBody(req, checkSetValueSchema);
             const { set } = validateParams(req, setIdParamSchema);
 
             const setData = await prisma.set.findUnique({
@@ -267,7 +267,7 @@ export class SetController {
                 success: true,
                 data: {
                     exists: !!setValue,
-                    setValue,
+                    value: setValue,
                 },
             });
         } catch (error) {

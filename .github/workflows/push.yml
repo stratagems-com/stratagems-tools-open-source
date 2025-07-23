@@ -1,0 +1,29 @@
+name: Build and Push Image
+on:
+  push:
+    branches:
+      - main
+env:
+  IMAGE_NAME: contentforge
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: :receipt: Checkout Code
+        uses: actions/checkout@v3
+      - name: :label: Read Version
+        id: version
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+      - name: :closed_lock_with_key: Log in to Docker Registry
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_URL }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+      - name: :hammer_and_wrench: Build and Push Image
+        run: |
+          docker build -t ${{ secrets.REGISTRY_URL }}/$IMAGE_NAME:$VERSION .
+          docker tag ${{ secrets.REGISTRY_URL }}/$IMAGE_NAME:$VERSION ${{ secrets.REGISTRY_URL }}/$IMAGE_NAME:latest
+          docker push ${{ secrets.REGISTRY_URL }}/$IMAGE_NAME:$VERSION
+          docker push ${{ secrets.REGISTRY_URL }}/$IMAGE_NAME:latest
+      - name: :white_check_mark: Build Complete
+        run: |
+          echo ":tada: Image built and pushed successfully!"
+          echo ":package: Image: ${{ secrets.REGISTRY_URL }}/$IMAGE_NAME:$VERSION"
+          echo ":label:  Latest: ${{ secrets.REGISTRY_URL }}/$IMAGE_NAME:latest" (edited) 

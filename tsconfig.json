@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "CommonJS", // Changed from ESNext
     "moduleResolution": "node",
     "lib": ["ES2022"],
     "outDir": "./dist",
@@ -27,7 +27,7 @@
     "allowUnreachableCode": false,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "verbatimModuleSyntax": true,
+    // Remove verbatimModuleSyntax for CommonJS
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"],
@@ -48,9 +48,5 @@
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts"
-  ],
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  }
-} 
+  ]
+}
