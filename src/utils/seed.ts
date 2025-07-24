@@ -1,7 +1,41 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import { config } from './config';
 import logger from './logger';
 
 const prisma = new PrismaClient();
+
+const createSuperAdmin = async () => {
+    if (!config.SUPER_ADMIN_EMAIL || !config.SUPER_ADMIN_PASSWORD) {
+        logger.warn('SUPER_ADMIN_EMAIL or SUPER_ADMIN_PASSWORD not set, skipping super admin creation');
+        return;
+    }
+
+    const existingSuperAdmin = await prisma.user.findFirst({
+        where: { role: 'SUPER_ADMIN' },
+    });
+
+    if (existingSuperAdmin) {
+        logger.info('Super admin already exists');
+        return;
+    }
+
+    const hashedPassword = await bcrypt.hash(config.SUPER_ADMIN_PASSWORD, 12);
+
+    const superAdmin = await prisma.user.create({
+        data: {
+            email: config.SUPER_ADMIN_EMAIL,
+            username: "superadmin",
+            firstName: "Super",
+            lastName: "Admin",
+            passwordHash: hashedPassword,
+            role: 'SUPER_ADMIN',
+            isEmailVerified: true,
+        },
+    });
+
+    logger.info('Created super admin account', { userId: superAdmin.id });
+};
 
 // Generate random 5-digit ID
 const generateId = (): string => {
@@ -167,27 +201,30 @@ const generateTestData = async () => {
 };
 
 // Main seeding function
-export const seedTestData = async () => {
+export const seed = async () => {
     try {
-        logger.info('Starting test data seeding...');
+        logger.info('Starting database seeding...');
 
-        const existingData = await checkExistingData();
+        await createSuperAdmin();
 
-        if (existingData.hasAnyData) {
-            logger.info('Data already exists in the system, skipping test data generation');
-            return;
+        if (config.TEST_DATA) {
+            const existingData = await checkExistingData();
+
+            if (existingData.hasAnyData) {
+                logger.info('Data already exists in the system, skipping test data generation');
+            } else {
+                logger.info('No existing data found, creating test data...');
+                await createTestApp();
+                await generateTestData();
+            }
         }
 
-        logger.info('No existing data found, creating test data...');
-        await createTestApp();
-        await generateTestData();
-
-        logger.info('Test data seeding completed successfully');
+        logger.info('Database seeding completed successfully');
     } catch (error) {
-        logger.error('Error seeding test data', { error });
+        logger.error('Error seeding data', { error });
         throw error;
     }
 };
 
 // Export for use in other files
-export default seedTestData; 
+export default seed;
