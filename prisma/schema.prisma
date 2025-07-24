@@ -355,6 +355,41 @@ model SetValue {
 }
 
 // =============================================================================
+// WARNING SYSTEM
+// =============================================================================
+
+model Warning {
+    id        String   @id @default(cuid())
+    type      String   // "lookup", "set", etc.
+    typeName  String   // Name of the lookup/set
+    typeId    String   // ID of the lookup/set
+    itemId    String   // ID of the specific item with the warning
+    issuedAt  DateTime @default(now())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Duplicate type flags
+    leftDuplicate      Boolean @default(false)
+    rightDuplicate     Boolean @default(false)
+    leftRightDuplicate Boolean @default(false)
+
+    // Additional warning metadata
+    details Json? // Additional context about the warning
+    severity WarningSeverity @default(MEDIUM)
+    isResolved Boolean @default(false)
+    resolvedAt DateTime?
+    resolvedBy String? // User ID who resolved it
+
+    @@index([type])
+    @@index([typeId])
+    @@index([itemId])
+    @@index([isResolved])
+    @@index([severity])
+    @@index([createdAt])
+    @@map("warnings")
+}
+
+// =============================================================================
 // ENUMS
 // =============================================================================
 
@@ -391,6 +426,13 @@ enum SecurityEventType {
 }
 
 enum SecuritySeverity {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+}
+
+enum WarningSeverity {
     LOW
     MEDIUM
     HIGH

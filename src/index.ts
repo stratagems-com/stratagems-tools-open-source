@@ -4,6 +4,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { config, isTest } from "./utils/config";
+import { CronManager } from "./utils/cron-manager";
 import { connectDatabase, disconnectDatabase } from "./utils/database";
 import logger from "./utils/logger";
 
@@ -19,6 +20,7 @@ import authRoutes from "./routes/v1/auth.routes";
 import lookupRoutes from "./routes/v1/lookup.routes";
 import setRoutes from "./routes/v1/set.routes";
 import userRoutes from "./routes/v1/user.routes";
+import warningRoutes from "./routes/v1/warning.routes";
 import { seed } from "./utils/seed";
 
 const app = express() as express.Express;
@@ -87,6 +89,7 @@ app.use("/api/v1/apps", appRoutes);
 app.use("/api/v1/lookups", lookupRoutes);
 app.use("/api/v1/sets", setRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/warnings", warningRoutes);
 
 // API info endpoint
 app.get("/api/info", (_, res) => {
@@ -100,6 +103,7 @@ app.get("/api/info", (_, res) => {
         apps: "/api/v1/apps",
         lookups: "/api/v1/lookups",
         sets: "/api/v1/sets",
+        warnings: "/api/v1/warnings",
       },
     },
     health: "/health",
@@ -112,11 +116,39 @@ app.use(notFoundHandler);
 // Error handler (must be last)
 app.use(errorHandler);
 
+// Initialize cron jobs
+const initializeCronJobs = () => {
+  if (isTest()) {
+    logger.info("Skipping cron jobs in test environment");
+    return;
+  }
+
+  // logger.info("Initializing cron jobs...");
+
+  // // Warning detection job - runs every 10 minutes
+  // CronManager.registerJob(
+  //   "warning-detection",
+  //   "*/10 * * * *", // Every 10 minutes
+  //   WarningDetectionJob.execute,
+  //   {
+  //     timezone: "UTC",
+  //     runOnInit: false, // Don't run immediately on startup
+  //   }
+  // );
+
+  // // Start all cron jobs
+  // CronManager.startAll();
+  logger.info("Cron jobs initialized successfully");
+};
+
 // Graceful shutdown
 const gracefulShutdown = async (signal: string) => {
   logger.info(`Received ${signal}. Starting graceful shutdown...`);
 
   try {
+    // Stop all cron jobs
+    CronManager.stopAll();
+
     await disconnectDatabase();
     logger.info("Graceful shutdown completed");
     process.exit(0);
@@ -137,6 +169,9 @@ const startServer = async () => {
     await connectDatabase();
 
     await seed();
+
+    // Initialize cron jobs
+    initializeCronJobs();
 
     // Start listening
     app.listen(config.PORT, () => {
